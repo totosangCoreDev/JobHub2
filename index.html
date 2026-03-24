@@ -465,6 +465,28 @@
             border-color: var(--primary-hover) !important;
         }
 
+        /* Group Filter Tabs */
+        .group-tab {
+            width: auto;
+            padding: 0.4rem 1rem;
+            font-size: 0.85rem;
+            border-radius: 0.5rem; /* More rectangular like image */
+            background: white;
+            color: var(--text);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .group-tab:hover {
+            background: #f1f5f9;
+        }
+        .group-tab-active {
+            background: #f1f5f9 !important;
+            border-color: var(--text) !important;
+            box-shadow: 0 0 0 1px var(--text);
+        }
+
         #toast {
             position: fixed;
             bottom: 2rem;
@@ -557,7 +579,9 @@
                 <h2 style="margin: 0;">All Jobs</h2>
             </div>
             <!-- Term Filter Tabs -->
-            <div id="termFilterTabs" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem;"></div>
+            <div id="termFilterTabs" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;"></div>
+            <!-- Group Filter Tabs -->
+            <div id="groupFilterTabs" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem;"></div>
             <div id="adminJobList" class="grid" style="margin-top: 0.5rem;"></div>
         </div>
 
@@ -1349,40 +1373,62 @@
         }
 
         let activeTermFilter = 'all'; // Track current term filter
+        let activeGroupFilter = 'all'; // Track current group filter
 
-        function buildTermTabs(jobs, role) {
+        function buildFilterTabs(jobs, role) {
             if (role !== 'admin') return;
-            const tabContainer = document.getElementById('termFilterTabs');
-            if (!tabContainer) return;
+            
+            // 1. Build Term Tabs
+            const termTabContainer = document.getElementById('termFilterTabs');
+            if (termTabContainer) {
+                const termSet = new Map();
+                jobs.forEach(job => {
+                    const y = job.AcademicYear || job['ปีการศึกษา'] || '';
+                    const s = job.Semester || job['ภาคเรียนที่'] || '';
+                    if (y && s) {
+                        const key = `${s}/${y}`;
+                        if (!termSet.has(key)) termSet.set(key, { sem: Number(s), year: Number(y), key });
+                    }
+                });
+                const sortedTerms = [...termSet.values()].sort((a, b) =>
+                    b.year !== a.year ? b.year - a.year : b.sem - a.sem
+                );
+                let termHtml = `<button type="button" class="term-tab ${activeTermFilter === 'all' ? 'term-tab-active' : ''}" onclick="filterByTerm('all')">ทั้งหมด</button>`;
+                sortedTerms.forEach(t => {
+                    termHtml += `<button type="button" class="term-tab ${activeTermFilter === t.key ? 'term-tab-active' : ''}" onclick="filterByTerm('${t.key}')">${t.key}</button>`;
+                });
+                termTabContainer.innerHTML = termHtml;
+            }
 
-            // Collect unique terms and sort newest first
-            const termSet = new Map();
-            jobs.forEach(job => {
-                const y = job.AcademicYear || job['ปีการศึกษา'] || '';
-                const s = job.Semester || job['ภาคเรียนที่'] || '';
-                if (y && s) {
-                    const key = `${s}/${y}`;
-                    if (!termSet.has(key)) termSet.set(key, { sem: Number(s), year: Number(y), key });
-                }
-            });
-
-            // Sort by year DESC, then semester DESC
-            const sorted = [...termSet.values()].sort((a, b) =>
-                b.year !== a.year ? b.year - a.year : b.sem - a.sem
-            );
-
-            let html = `<button type="button" class="term-tab ${activeTermFilter === 'all' ? 'term-tab-active' : ''}" onclick="filterByTerm('all')">ทั้งหมด</button>`;
-            sorted.forEach(t => {
-                const isActive = activeTermFilter === t.key;
-                html += `<button type="button" class="term-tab ${isActive ? 'term-tab-active' : ''}" onclick="filterByTerm('${t.key}')">${t.key}</button>`;
-            });
-            tabContainer.innerHTML = html;
+            // 2. Build Group Tabs
+            const groupTabContainer = document.getElementById('groupFilterTabs');
+            if (groupTabContainer) {
+                const groupSet = new Set();
+                jobs.forEach(job => {
+                    const g = job.WorkGroup || job['กลุ่มงาน'] || '';
+                    if (g) g.split(',').forEach(item => groupSet.add(item.trim()));
+                });
+                const sortedGroups = [...groupSet].sort();
+                
+                let groupHtml = `<button type="button" class="group-tab ${activeGroupFilter === 'all' ? 'group-tab-active' : ''}" onclick="filterByGroup('all')">ทั้งหมด</button>`;
+                sortedGroups.forEach(g => {
+                    groupHtml += `<button type="button" class="group-tab ${activeGroupFilter === g ? 'group-tab-active' : ''}" onclick="filterByGroup('${g}')">${g}</button>`;
+                });
+                groupTabContainer.innerHTML = groupHtml;
+            }
         }
 
         function filterByTerm(key) {
             activeTermFilter = key;
             const role = currentUser && currentUser.role === 'Admin' ? 'admin' : 'teacher';
-            buildTermTabs(allJobs, role); // Rebuild to update active highlight
+            buildFilterTabs(allJobs, role);
+            renderJobCards(allJobs, role);
+        }
+
+        function filterByGroup(group) {
+            activeGroupFilter = group;
+            const role = currentUser && currentUser.role === 'Admin' ? 'admin' : 'teacher';
+            buildFilterTabs(allJobs, role);
             renderJobCards(allJobs, role);
         }
 
@@ -1394,10 +1440,17 @@
                 return db - da;
             });
 
-            const filtered = activeTermFilter === 'all' ? sorted : sorted.filter(job => {
+            const filtered = sorted.filter(job => {
+                // Term Filter
                 const y = job.AcademicYear || job['ปีการศึกษา'] || '';
                 const s = job.Semester || job['ภาคเรียนที่'] || '';
-                return `${s}/${y}` === activeTermFilter;
+                const termMatch = activeTermFilter === 'all' || `${s}/${y}` === activeTermFilter;
+                
+                // Group Filter
+                const g = job.WorkGroup || job['กลุ่มงาน'] || '';
+                const groupMatch = activeGroupFilter === 'all' || g.split(',').map(item => item.trim()).includes(activeGroupFilter);
+                
+                return termMatch && groupMatch;
             });
 
             const listId = role === 'admin' ? 'adminJobList' : 'teacherJobList';
@@ -1428,26 +1481,31 @@
 
                 card.innerHTML = `
                     ${isAdmin ? `<div class="delete-btn" onclick="deleteJobUI('${job.JobID}', '${job.Title.replace(/'/g, "\\'")}')" title="Delete Job"></div>` : ''}
-                    <div>
-                        ${termBadge}${groupBadge}
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                            <h3 style="margin-bottom: 0.25rem;">${job.Title}</h3>
-                            <span style="color: var(--primary); font-weight: 700; font-size: 0.875rem;">${percent}%</span>
+                    <div style="flex-grow: 1;">
+                        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem;">
+                            ${termBadge}${groupBadge}
                         </div>
-                        <p>${job.Description}</p>
-                        <div class="progress-container" style="height: 6px; margin: 0.5rem 0;">
-                            <div class="progress-fill" style="width: ${percent}%"></div>
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;">
+                            <h3 style="margin: 0; font-size: 1.125rem; font-weight: 700;">${job.Title}</h3>
+                            <span style="color: var(--primary); font-weight: 700; font-size: 1rem;">${percent}%</span>
                         </div>
-                        <div class="submitter-tray" style="margin-top: 1rem; transform: scale(0.9); transform-origin: left;">
-                            ${(job.assignedUsers || []).map(u => {
-                                const hasSubmitted = job.submitters.some(s => s.id.toString().trim().toLowerCase() === u.id.toString().trim().toLowerCase());
-                                return `<img src="${getImgUrl(u.profilePic)}" class="tray-avatar ${hasSubmitted ? 'done' : 'pending'}" onerror="handleImgError(this)" title="${u.name} (ID: ${u.id})">` ;
-                            }).join('')}
-                            <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 20px; line-height: 32px;">${submittedCount} / ${targetCount} submitted</span>
+                        
+                        <div class="progress-container" style="height: 6px; margin: 0.5rem 0 1rem 0; background: #e2e8f0; border-radius: 1rem; overflow: hidden;">
+                            <div class="progress-fill" style="width: ${percent}%; background: #6366f1; height: 100%;"></div>
                         </div>
-                        <div class="deadline" style="margin-top: 1rem; color: #ff4d4f; font-weight: 600;">Deadline: ${new Date(job.Deadline).toLocaleString()}</div>
+                        
+                        <div class="submitter-tray" style="margin-top: 1rem; margin-bottom: 0.5rem; display: flex; align-items: center;">
+                            <div style="display: flex; margin-right: 0.75rem;">
+                                ${(job.assignedUsers || []).map(u => {
+                                    const hasSubmitted = job.submitters.some(s => s.id.toString().trim().toLowerCase() === u.id.toString().trim().toLowerCase());
+                                    return `<img src="${getImgUrl(u.profilePic)}" class="tray-avatar ${hasSubmitted ? 'done' : 'pending'}" onerror="handleImgError(this)" title="${u.name}" style="width: 32px; height: 32px; border-radius: 50%; border: 2px solid ${hasSubmitted ? '#52c41a' : '#ff4d4f'}; margin-left: -8px; background: white;">` ;
+                                }).join('')}
+                            </div>
+                        </div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 1.5rem;">${submittedCount} / ${targetCount} submitted</div>
+                        <div class="deadline" style="color: #ff4d4f; font-weight: 600; font-size: 0.875rem; margin-bottom: 1rem;">Deadline: ${new Date(job.Deadline).toLocaleString()}</div>
                     </div>
-                    <button type="button" onclick="openBoard('${job.id || job.JobID}')" style="margin-top: 1rem;">View Board</button>
+                    <button type="button" onclick="openBoard('${job.id || job.JobID}')" style="background: #4f46e5; border-radius: 0.5rem; padding: 0.75rem; font-weight: 600;">View Board</button>
                 `;
                 container.appendChild(card);
             });
@@ -1459,7 +1517,7 @@
             allJobs = jobs;
             window._totalTeachers = data.totalTeachers || 1;
 
-            buildTermTabs(jobs, role);
+            buildFilterTabs(jobs, role);
             renderJobCards(jobs, role);
         }
 
