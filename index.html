@@ -45,7 +45,7 @@
             box-shadow: var(--shadow);
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 1000;
         }
 
         .nav-content {
@@ -203,7 +203,7 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            z-index: 1000;
+            z-index: 1100;
             backdrop-filter: blur(4px);
         }
 
@@ -442,6 +442,31 @@
             display: flex;
         }
 
+        /* Term Filter Tabs */
+        .term-tab {
+            width: auto;
+            padding: 0.4rem 1rem;
+            font-size: 0.85rem;
+            border-radius: 2rem;
+            background: var(--border);
+            color: var(--text);
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+        }
+
+        .term-tab:hover {
+            background: #e0e7ff;
+            color: var(--primary);
+        }
+
+        .term-tab-active {
+            background: var(--primary) !important;
+            color: white !important;
+            border-color: var(--primary-hover) !important;
+        }
+
         #toast {
             position: fixed;
             bottom: 2rem;
@@ -529,11 +554,15 @@
 
         <!-- Admin View -->
         <div id="adminView" class="hidden">
-            <div class="card create-job-banner" onclick="openCreateJobModal()" style="cursor: pointer; padding: 1.5rem 2rem; display: flex; align-items: center; justify-content: space-between; transition: transform 0.2s, box-shadow 0.2s;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 15px -3px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='none'; this.style.boxShadow='var(--shadow)';">
-                <h2 style="margin: 0; font-size: 1.25rem;">Create New Job</h2>
+            <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; flex-wrap: wrap;">
+                <button type="button" onclick="openCreateJobModal()"
+                    style="width: auto; padding: 0.6rem 1.25rem; font-size: 0.95rem; display: flex; align-items: center; gap: 0.4rem;">➕
+                    Create New Job</button>
+                <h2 style="margin: 0;">All Jobs</h2>
             </div>
-            <h2>All Jobs</h2>
-            <div id="adminJobList" class="grid" style="margin-top: 1rem;"></div>
+            <!-- Term Filter Tabs -->
+            <div id="termFilterTabs" style="display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.25rem;"></div>
+            <div id="adminJobList" class="grid" style="margin-top: 0.5rem;"></div>
         </div>
 
         <!-- Teacher View -->
@@ -545,32 +574,38 @@
         <!-- Submission Board (Padlet View) -->
         <style>
             .bookshelf-bg {
-                background-color: #d18d48; /* Warm wooden back wall */
+                background-color: #d18d48;
+                /* Warm wooden back wall */
                 /* Repeating horizontal shelves matching wood block style */
-                background-image: linear-gradient(to bottom, 
-                    rgba(84,36,8,0.7) 0px, 
-                    rgba(84,36,8,0.2) 15px,
-                    transparent 20px,
-                    transparent 140px, 
-                    #8e4a1c 140px,   /* Back of shelf depth */
-                    #b26a2e 160px,   /* Middle of depth */
-                    #efb471 160px,   /* Start of front lip */
-                    #d28e46 172px,   /* End of front lip */
-                    #52290f 172px,   /* Shadow under lip */
-                    #1a0b02 180px
-                );
+                background-image: linear-gradient(to bottom,
+                        rgba(84, 36, 8, 0.7) 0px,
+                        rgba(84, 36, 8, 0.2) 15px,
+                        transparent 20px,
+                        transparent 140px,
+                        #8e4a1c 140px,
+                        /* Back of shelf depth */
+                        #b26a2e 160px,
+                        /* Middle of depth */
+                        #efb471 160px,
+                        /* Start of front lip */
+                        #d28e46 172px,
+                        /* End of front lip */
+                        #52290f 172px,
+                        /* Shadow under lip */
+                        #1a0b02 180px);
                 background-size: 100% 180px;
                 padding: 0 40px;
                 display: flex;
                 flex-wrap: wrap;
                 align-content: flex-start;
-                border: 18px solid #d28e46; /* Matching outer frame */
+                border: 18px solid #d28e46;
+                /* Matching outer frame */
                 border-top-color: #8e4a1c;
                 border-bottom-color: #1a0b02;
                 border-left-color: #aa652b;
                 border-right-color: #aa652b;
-                box-shadow: inset 15px 0 30px rgba(0,0,0,0.5), inset -15px 0 30px rgba(0,0,0,0.5);
-                min-height: 540px; 
+                box-shadow: inset 15px 0 30px rgba(0, 0, 0, 0.5), inset -15px 0 30px rgba(0, 0, 0, 0.5);
+                min-height: 540px;
                 border-radius: 4px;
                 margin-top: 2rem;
             }
@@ -579,12 +614,13 @@
                 box-sizing: border-box;
                 width: 105px;
                 height: 125px;
-                margin: 30px 25px 25px 25px; /* 30 + 125 = 155px. perfect shelf rest */
+                margin: 30px 25px 25px 25px;
+                /* 30 + 125 = 155px. perfect shelf rest */
                 background: linear-gradient(to right, #2980b9, #3498db);
                 color: white;
                 position: relative;
                 border-radius: 2px 7px 7px 2px;
-                box-shadow: 10px 10px 15px rgba(0,0,0,0.6), inset -2px 0 6px rgba(255,255,255,0.2);
+                box-shadow: 10px 10px 15px rgba(0, 0, 0, 0.6), inset -2px 0 6px rgba(255, 255, 255, 0.2);
                 display: block;
                 text-decoration: none;
                 transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
@@ -592,7 +628,7 @@
 
             .book-item:hover {
                 transform: translateY(-15px) rotate(-2deg);
-                box-shadow: 15px 20px 25px rgba(0,0,0,0.5), inset -2px 0 6px rgba(255,255,255,0.4);
+                box-shadow: 15px 20px 25px rgba(0, 0, 0, 0.5), inset -2px 0 6px rgba(255, 255, 255, 0.4);
                 z-index: 10;
             }
 
@@ -603,14 +639,15 @@
                 top: 0;
                 bottom: 0;
                 width: 6px;
-                background: linear-gradient(to right, rgba(255,255,255,0.4), transparent);
+                background: linear-gradient(to right, rgba(255, 255, 255, 0.4), transparent);
                 border-radius: 2px 0 0 2px;
             }
 
             .book-title {
                 position: absolute;
                 top: -20px;
-                left: -5px; /* Tiny overflow for rounded edges aesthetic */
+                left: -5px;
+                /* Tiny overflow for rounded edges aesthetic */
                 right: -5px;
                 font-size: 0.70rem;
                 font-weight: 700;
@@ -618,8 +655,9 @@
                 white-space: nowrap;
                 overflow: hidden;
                 text-overflow: ellipsis;
-                color: #ffe6cc; /* Light cream to stand out from dark shadow wall */
-                text-shadow: 1px 1px 2px rgba(0,0,0,0.9);
+                color: #ffe6cc;
+                /* Light cream to stand out from dark shadow wall */
+                text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.9);
                 z-index: 5;
             }
 
@@ -640,9 +678,9 @@
                 height: 25px;
                 border-radius: 50%;
                 margin-bottom: 5px;
-                border: 2px solid rgba(255,255,255,0.6);
+                border: 2px solid rgba(255, 255, 255, 0.6);
                 object-fit: cover;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
             }
 
             .book-delete {
@@ -661,23 +699,39 @@
                 font-size: 12px;
                 font-weight: bold;
                 cursor: pointer;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
                 z-index: 100;
                 opacity: 0;
                 transition: opacity 0.2s, transform 0.2s;
             }
+
             .book-delete:hover {
                 transform: scale(1.1);
             }
+
             .book-item:hover .book-delete {
                 opacity: 1;
             }
 
-            .book-color-0 { background: linear-gradient(to right, #8e44ad, #9b59b6); }
-            .book-color-1 { background: linear-gradient(to right, #2980b9, #3498db); }
-            .book-color-2 { background: linear-gradient(to right, #27ae60, #2ecc71); }
-            .book-color-3 { background: linear-gradient(to right, #c0392b, #e74c3c); }
-            .book-color-4 { background: linear-gradient(to right, #d35400, #e67e22); }
+            .book-color-0 {
+                background: linear-gradient(to right, #8e44ad, #9b59b6);
+            }
+
+            .book-color-1 {
+                background: linear-gradient(to right, #2980b9, #3498db);
+            }
+
+            .book-color-2 {
+                background: linear-gradient(to right, #27ae60, #2ecc71);
+            }
+
+            .book-color-3 {
+                background: linear-gradient(to right, #c0392b, #e74c3c);
+            }
+
+            .book-color-4 {
+                background: linear-gradient(to right, #d35400, #e67e22);
+            }
         </style>
         <div id="submissionView" class="hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
@@ -780,11 +834,13 @@
     <!-- Create Job Modal -->
     <div id="createJobModal" class="modal-overlay">
         <div class="modal" style="max-width: 800px; width: 95%; max-height: 90vh; overflow-y: auto;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+            <div
+                style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
                 <h2 style="margin: 0; font-size: 1.5rem;">Create New Job</h2>
-                <button type="button" onclick="closeCreateJobModal()" style="width: auto; background: none; border: none; font-size: 1.5rem; line-height: 1; color: var(--text-muted); cursor: pointer; padding: 0.5rem;">✕</button>
+                <button type="button" onclick="closeCreateJobModal()"
+                    style="width: auto; background: none; border: none; font-size: 1.5rem; line-height: 1; color: var(--text-muted); cursor: pointer; padding: 0.5rem;">✕</button>
             </div>
-            
+
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                 <div class="form-group" style="margin-bottom: 0;">
                     <label>Title</label>
@@ -799,46 +855,88 @@
                 <label>Description</label>
                 <textarea id="jobDesc" rows="2"></textarea>
             </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
                 <div class="form-group" style="margin-bottom: 0;">
-                    <label>ปีการศึกษา (Academic Year)</label>
+                    <label>ปีการศึกษา</label>
                     <input type="number" id="jobAcademicYear" placeholder="เช่น 2568" value="2568">
                 </div>
                 <div class="form-group" style="margin-bottom: 0;">
-                    <label>ภาคเรียนที่ (Semester)</label>
-                    <select id="jobSemester" style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 0.5rem; background-color: var(--bg-light); color: var(--text); font-family: inherit; font-size: 1rem;">
+                    <label>ภาคเรียนที่</label>
+                    <select id="jobSemester"
+                        style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 0.5rem; background-color: var(--bg-light); color: var(--text); font-family: inherit; font-size: 1rem;">
                         <option value="1">1</option>
                         <option value="2">2</option>
+                    </select>
+                </div>
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>กลุ่มงาน (Work Group)</label>
+                    <select id="jobWorkGroup" 
+                        style="width: 100%; padding: 0.75rem; border: 1px solid var(--border); border-radius: 0.5rem; background-color: var(--bg-light); color: var(--text); font-family: inherit; font-size: 1rem;">
+                        <option value="">-- เลือกกลุ่มงาน --</option>
                     </select>
                 </div>
             </div>
 
             <div class="form-group">
-                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
+                <div
+                    style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.75rem;">
                     <div style="display: flex; align-items: center; gap: 1rem;">
                         <h3 style="font-size: 1.125rem; font-weight: 600; margin: 0;">Assign Teachers</h3>
-                        <label style="font-size: 0.875rem; color: var(--primary); cursor: pointer; display: flex; align-items: center; gap: 0.25rem; margin: 0; font-weight: 600;">
+                        <label
+                            style="font-size: 0.875rem; color: var(--primary); cursor: pointer; display: flex; align-items: center; gap: 0.25rem; margin: 0; font-weight: 600;">
                             <input type="checkbox" id="selectAllTeachers" style="width: auto; margin: 0;"
                                 onclick="toggleAllTeachers(this.checked)"> Select All
                         </label>
                     </div>
                 </div>
                 <div id="groupFilters" style="margin-bottom: 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap;"></div>
-                <div id="teacherChecklist" class="grid-list" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); column-gap: 1rem; row-gap: 0.5rem; border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; max-height: 250px; overflow-y: auto;">Loading teachers...</div>
+                <div id="teacherChecklist" class="grid-list"
+                    style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); column-gap: 1rem; row-gap: 0.5rem; border: 1px solid var(--border); border-radius: 0.5rem; padding: 1rem; max-height: 250px; overflow-y: auto;">
+                    Loading teachers...</div>
             </div>
 
-            <button type="button" onclick="createJob()" style="width: 100%; margin-top: 1rem; font-size: 1.125rem;">Publish Job</button>
+            <button type="button" onclick="createJob()"
+                style="width: 100%; margin-top: 1rem; font-size: 1.125rem;">Publish Job</button>
+        </div>
+    </div>
+
+    <!-- Select Job Group Modal -->
+    <div id="selectJobGroupModal" class="modal-overlay">
+        <div class="modal" style="max-width: 500px; width: 90%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border); padding-bottom: 1rem;">
+                <h2 style="margin: 0; font-size: 1.25rem;">เลือกกลุ่มงานสำหรับงานนี้</h2>
+                <button type="button" onclick="closeSelectJobGroupModal()" style="width: auto; background: none; border: none; font-size: 1.5rem; line-height: 1; color: var(--text-muted); cursor: pointer;">✕</button>
+            </div>
+            
+            <div id="jobGroupOptions" style="display: grid; grid-template-columns: 1fr; gap: 0.75rem; margin-bottom: 1.5rem; max-height: 300px; overflow-y: auto; padding: 0.5rem;">
+                <!-- Group buttons will be populated here -->
+            </div>
+
+            <div class="form-group">
+                <label>หรือระบุชื่อกลุ่มเอง (Custom Name)</label>
+                <input type="text" id="customJobGroupName" placeholder="พิมพ์ชื่อกลุ่มงานที่ต้องการที่นี่...">
+            </div>
+
+            <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
+                <button type="button" class="btn-secondary" onclick="closeSelectJobGroupModal()" style="flex: 1;">ยกเลิก</button>
+                <button type="button" id="confirmJobGroupBtn" style="flex: 1; background: var(--primary); color: white; border: none; border-radius: 0.5rem; font-weight: 600; cursor: pointer;">ยืนยัน</button>
+            </div>
         </div>
     </div>
 
     <!-- Context Menu for Group Buttons -->
-    <div id="groupContextMenu" style="display: none; position: absolute; background: white; border: 1px solid var(--border); box-shadow: var(--shadow); border-radius: 0.5rem; z-index: 1000; padding: 0.5rem 0; min-width: 150px; font-size: 0.875rem;">
-        <div class="context-item" id="contextRename" style="padding: 0.5rem 1rem; cursor: pointer; border-bottom: 1px solid #eee;">✏️ แก้ไขชื่อกลุ่ม</div>
-        <div class="context-item" id="contextDelete" style="padding: 0.5rem 1rem; cursor: pointer; color: var(--danger);">🗑️ ลบกลุ่มงาน</div>
+    <div id="groupContextMenu"
+        style="display: none; position: absolute; background: white; border: 1px solid var(--border); box-shadow: var(--shadow); border-radius: 0.5rem; z-index: 1000; padding: 0.5rem 0; min-width: 150px; font-size: 0.875rem;">
+        <div class="context-item" id="contextRename"
+            style="padding: 0.5rem 1rem; cursor: pointer; border-bottom: 1px solid #eee;">✏️ แก้ไขชื่อกลุ่ม</div>
+        <div class="context-item" id="contextDelete"
+            style="padding: 0.5rem 1rem; cursor: pointer; color: var(--danger);">🗑️ ลบกลุ่มงาน</div>
     </div>
     <style>
-        .context-item:hover { background-color: #f5f5f5; }
+        .context-item:hover {
+            background-color: #f5f5f5;
+        }
     </style>
 
     <!-- Add Work Group Modal -->
@@ -851,7 +949,8 @@
             </div>
             <div class="form-group">
                 <label>เลือกผู้ร่วมงาน</label>
-                <div id="addGroupTeacherList" style="max-height: 250px; overflow-y: auto; border: 1px solid var(--border); padding: 1rem; border-radius: 0.5rem; background: #fafafa;">
+                <div id="addGroupTeacherList"
+                    style="max-height: 250px; overflow-y: auto; border: 1px solid var(--border); padding: 1rem; border-radius: 0.5rem; background: #fafafa;">
                     <!-- Checkboxes will be populated here -->
                 </div>
             </div>
@@ -1042,12 +1141,12 @@
 
         async function loadTeacherChecklist() {
             const checklist = document.getElementById('teacherChecklist');
-            
+
             // Save currently checked teachers so they don't disappear on re-render
             const currentCheckedList = Array.from(document.querySelectorAll('.teacher-checkbox:checked')).map(cb => cb.value.toString().trim());
-            
+
             const teachers = await api('getAllTeachers', {}, { silent: true });
-            
+
             // Build dynamic group buttons, handling comma-separated lists
             let allGroups = [];
             teachers.forEach(t => {
@@ -1058,17 +1157,45 @@
             });
             const rawGroups = [...new Set(allGroups)];
             const groups = getOrderedGroups(rawGroups);
-            
+
             const groupFilters = document.getElementById('groupFilters');
+            const jobWorkGroupSelect = document.getElementById('jobWorkGroup');
+            
             if (groupFilters) {
                 let filterHtml = `<button type="button" draggable="false" onclick="openAddGroupModal()" style="width: auto; padding: 0.25rem 0.5rem; font-size: 0.75rem; border-radius: 1rem; background: var(--primary); color: white; font-weight: bold; border: none; cursor: pointer; box-shadow: var(--shadow);">+ เพิ่มกลุ่มงาน</button>`;
-                
+
                 if (groups.length > 0) {
-                    filterHtml += groups.map(g => 
+                    filterHtml += groups.map(g =>
                         `<button type="button" class="group-btn" data-groupname="${g}" onclick="toggleGroup('${g}')" style="width: auto; padding: 0.25rem 0.5rem; font-size: 0.75rem; border-radius: 1rem; background: var(--border); color: var(--text); border: none; cursor: pointer; transition: all 0.2s;" draggable="true">+ ${g}</button>`
                     ).join('');
                 }
                 groupFilters.innerHTML = filterHtml;
+            }
+
+            // Also populate the Work Group select in the Create Job modal
+            if (jobWorkGroupSelect) {
+                const currentVal = jobWorkGroupSelect.value;
+                jobWorkGroupSelect.innerHTML = '<option value="">-- เลือกกลุ่มงาน --</option>' + 
+                    groups.map(g => `<option value="${g}">${g}</option>`).join('') +
+                    '<option value="other">ระบุเอง...</option>';
+                jobWorkGroupSelect.value = currentVal;
+
+                // Handle custom group name if needed
+                jobWorkGroupSelect.onchange = function() {
+                    if (this.value === 'other') {
+                        const custom = prompt('ระบุชื่อกลุ่มงานใหม่:');
+                        if (custom && custom.trim()) {
+                            // Temporary option
+                            const newOpt = document.createElement('option');
+                            newOpt.value = custom.trim();
+                            newOpt.text = custom.trim();
+                            this.add(newOpt, this.options[this.options.length - 1]);
+                            this.value = custom.trim();
+                        } else {
+                            this.value = '';
+                        }
+                    }
+                };
             }
 
             allTeachersCache = teachers; // Cache for Add Group Modal
@@ -1078,7 +1205,7 @@
 
             teachers.forEach(t => {
                 const isChecked = currentCheckedList.includes(t.id.toString().trim()) ? 'checked' : '';
-                
+
                 const div = document.createElement('div');
                 div.className = 'check-item';
                 div.style.borderBottom = 'none'; // Grid style
@@ -1087,7 +1214,7 @@
                 div.style.transition = 'background 0.2s';
                 div.onmouseover = () => div.style.background = '#f9f9f9';
                 div.onmouseout = () => div.style.background = 'transparent';
-                
+
                 div.onclick = (e) => {
                     if (e.target.tagName !== 'INPUT') {
                         const cb = div.querySelector('input');
@@ -1102,7 +1229,7 @@
                 `;
                 checklist.appendChild(div);
             });
-            
+
             setupDragAndDrop();
             updateGroupButtonStates();
             setupContextMenu();
@@ -1114,6 +1241,13 @@
                 return groups.includes(groupName);
             });
             if (checkboxes.length === 0) return;
+            
+            // Auto-fill the Work Group field in the Create Job modal
+            const jobWorkGroupInput = document.getElementById('jobWorkGroup');
+            if (jobWorkGroupInput) {
+                jobWorkGroupInput.value = groupName;
+            }
+
             const allChecked = checkboxes.every(cb => cb.checked);
             checkboxes.forEach(cb => cb.checked = !allChecked);
             updateGroupButtonStates();
@@ -1138,7 +1272,7 @@
                     }
                 });
                 return sorted.concat(unsortedGroups);
-            } catch(e) {
+            } catch (e) {
                 return unsortedGroups;
             }
         }
@@ -1149,33 +1283,33 @@
             let draggedItem = null;
 
             container.querySelectorAll('.group-btn').forEach(btn => {
-                btn.addEventListener('dragstart', function(e) {
+                btn.addEventListener('dragstart', function (e) {
                     draggedItem = this;
                     setTimeout(() => this.style.opacity = '0.5', 0);
                 });
-                
-                btn.addEventListener('dragend', function() {
+
+                btn.addEventListener('dragend', function () {
                     setTimeout(() => {
                         this.style.opacity = '1';
                         draggedItem = null;
-                        
+
                         // Save order
                         const order = Array.from(container.querySelectorAll('.group-btn')).map(b => b.dataset.groupname);
                         localStorage.setItem('customGroupOrder', JSON.stringify(order));
                     }, 0);
                 });
 
-                btn.addEventListener('dragover', function(e) { e.preventDefault(); });
-                btn.addEventListener('dragenter', function(e) { e.preventDefault(); this.style.transform = 'scale(1.05)'; });
-                btn.addEventListener('dragleave', function() { this.style.transform = 'scale(1)'; });
+                btn.addEventListener('dragover', function (e) { e.preventDefault(); });
+                btn.addEventListener('dragenter', function (e) { e.preventDefault(); this.style.transform = 'scale(1.05)'; });
+                btn.addEventListener('dragleave', function () { this.style.transform = 'scale(1)'; });
 
-                btn.addEventListener('drop', function(e) {
+                btn.addEventListener('drop', function (e) {
                     this.style.transform = 'scale(1)';
                     if (draggedItem !== this && draggedItem.classList.contains('group-btn')) {
                         let allBtns = Array.from(container.querySelectorAll('.group-btn'));
                         let draggedIndex = allBtns.indexOf(draggedItem);
                         let dropIndex = allBtns.indexOf(this);
-                        
+
                         if (draggedIndex < dropIndex) {
                             this.parentNode.insertBefore(draggedItem, this.nextSibling);
                         } else {
@@ -1193,7 +1327,7 @@
                     const groups = (cb.dataset.group || '').split(',').map(s => s.trim());
                     return groups.includes(groupName);
                 });
-                
+
                 if (checkboxes.length > 0 && checkboxes.every(cb => cb.checked)) {
                     btn.style.background = 'var(--success)';
                     btn.style.color = 'white';
@@ -1210,7 +1344,7 @@
         function setupContextMenu() {
             const menu = document.getElementById('groupContextMenu');
             if (!menu) return;
-            
+
             document.addEventListener('click', (e) => {
                 if (!menu.contains(e.target)) menu.style.display = 'none';
             });
@@ -1270,7 +1404,7 @@
                     else savedOrder.splice(index, 1);
                     localStorage.setItem('customGroupOrder', JSON.stringify(savedOrder));
                 }
-            } catch(e){}
+            } catch (e) { }
         }
 
         // --- Add Work Group Modal Logic ---
@@ -1319,63 +1453,146 @@
             document.querySelectorAll('.teacher-checkbox').forEach(cb => cb.checked = checked);
         }
 
-        async function loadJobs(role) {
-            const data = await api('getJobs', {}, { silent: true });
-            const jobs = data.jobs;
-            allJobs = jobs; // Cache globally
-            const totalTeachers = data.totalTeachers || 1;
+        let activeTermFilter = 'all'; // Track current term filter
+
+        function buildTermTabs(jobs, role) {
+            if (role !== 'admin') return;
+            const tabContainer = document.getElementById('termFilterTabs');
+            if (!tabContainer) return;
+
+            // Collect unique terms and sort newest first
+            const termSet = new Map();
+            const groupSet = new Set();
+            jobs.forEach(job => {
+                const y = job.AcademicYear || job['ปีการศึกษา'] || '';
+                const s = job.Semester || job['ภาคเรียนที่'] || '';
+                if (y && s) {
+                    const key = `${s}/${y}`;
+                    if (!termSet.has(key)) termSet.set(key, { sem: Number(s), year: Number(y), key });
+                }
+                const wg = job.WorkGroup || job['กลุ่มงาน'] || '';
+                if (wg) groupSet.add(wg.trim());
+            });
+
+            // Sort terms by year DESC, then semester DESC
+            const sortedTerms = [...termSet.values()].sort((a, b) =>
+                b.year !== a.year ? b.year - a.year : b.sem - a.sem
+            );
+
+            // Sort groups: วิชาการ, งบประมาณ, บุคคล, ทั่วไป, then others
+            const priorityGroups = ['วิชาการ', 'งบประมาณ', 'บุคคล', 'ทั่วไป'];
+            const sortedGroups = [...groupSet].sort((a, b) => {
+                const idxA = priorityGroups.indexOf(a);
+                const idxB = priorityGroups.indexOf(b);
+                if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+                if (idxA !== -1) return -1;
+                if (idxB !== -1) return 1;
+                return a.localeCompare(b, 'th');
+            });
+
+            let html = `<button type="button" class="term-tab ${activeTermFilter === 'all' ? 'term-tab-active' : ''}" onclick="filterByTerm('all')">ทั้งหมด</button>`;
+            
+            // Term tabs
+            sortedTerms.forEach(t => {
+                const isActive = activeTermFilter === t.key;
+                html += `<button type="button" class="term-tab ${isActive ? 'term-tab-active' : ''}" onclick="filterByTerm('${t.key}')">${t.key}</button>`;
+            });
+
+            // Group tabs
+            sortedGroups.forEach(g => {
+                const isActive = activeTermFilter === g;
+                html += `<button type="button" class="term-tab ${isActive ? 'term-tab-active' : ''}" onclick="filterByTerm('${g}')" style="display: inline-flex; align-items: center; gap: 4px;">📂 ${g}</button>`;
+            });
+
+            tabContainer.innerHTML = html;
+        }
+
+        function filterByTerm(key) {
+            activeTermFilter = key;
+            const role = currentUser && currentUser.role === 'Admin' ? 'admin' : 'teacher';
+            buildTermTabs(allJobs, role); // Rebuild to update active highlight
+            renderJobCards(allJobs, role);
+        }
+
+        function renderJobCards(jobs, role) {
+            // Sort newest first by CreatedAt
+            const sorted = [...jobs].sort((a, b) => {
+                const da = new Date(a.CreatedAt || 0);
+                const db = new Date(b.CreatedAt || 0);
+                return db - da;
+            });
+
+            const filtered = activeTermFilter === 'all' ? sorted : sorted.filter(job => {
+                const y = job.AcademicYear || job['ปีการศึกษา'] || '';
+                const s = job.Semester || job['ภาคเรียนที่'] || '';
+                const termKey = `${s}/${y}`;
+                const workGroup = (job.WorkGroup || job['กลุ่มงาน'] || '').trim();
+                
+                // Match either the term key or the work group name
+                return termKey === activeTermFilter || workGroup === activeTermFilter;
+            });
 
             const listId = role === 'admin' ? 'adminJobList' : 'teacherJobList';
             const container = document.getElementById(listId);
             container.innerHTML = '';
 
-            jobs.forEach(job => {
+            if (filtered.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); grid-column: 1/-1; text-align: center; padding: 2rem;">ไม่มีงานในเทอมนี้</p>';
+                return;
+            }
+
+            const totalTeachers = (window._totalTeachers) || 1;
+            filtered.forEach(job => {
                 const submittedCount = job.submitters.length;
                 const targetCount = (job.assignedUsers && job.assignedUsers.length > 0) ? job.assignedUsers.length : totalTeachers;
                 const percent = Math.round((submittedCount / targetCount) * 100);
 
                 const card = document.createElement('div');
                 card.className = 'job-card';
-                
+
                 const yearDisplay = job.AcademicYear || job['ปีการศึกษา'] || '';
                 const semDisplay = job.Semester || job['ภาคเรียนที่'] || '';
-                const termBadge = (yearDisplay && semDisplay) ? `<span style="font-size: 0.75rem; background: var(--bg-light); color: var(--text-muted); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); margin-bottom: 0.5rem; display: inline-block;">ภาคเรียนที่ ${semDisplay}/${yearDisplay}</span>` : '';
+                const workGroup = job.WorkGroup || job['กลุ่มงาน'] || '';
+
+                const termBadge = (yearDisplay && semDisplay) ? `<span style="font-size: 0.75rem; background: #eef2ff; color: var(--primary); padding: 2px 8px; border-radius: 4px; border: 1px solid #c7d2fe; margin-bottom: 0.5rem; display: inline-block; font-weight: 600;">เทอม ${semDisplay}/${yearDisplay}</span>` : '';
+                const isAdmin = currentUser && currentUser.role === 'Admin';
+                const groupBadge = workGroup ? `<span onclick="${isAdmin ? `changeJobWorkGroup('${job.id}', '${workGroup.replace(/'/g, "\\'")}')` : ''}" style="font-size: 0.75rem; background: #f0fdf4; color: #166534; padding: 2px 8px; border-radius: 4px; border: 1px solid #bbf7d0; margin-bottom: 0.5rem; margin-left: 0.5rem; display: inline-block; font-weight: 600; cursor: ${isAdmin ? 'pointer' : 'default'};" title="${isAdmin ? 'Click to edit Group' : ''}">📂 ${workGroup}</span>` : (isAdmin ? `<span onclick="changeJobWorkGroup('${job.id}', '')" style="font-size: 0.75rem; background: #fff7ed; color: #9a3412; padding: 2px 8px; border-radius: 4px; border: 1px solid #ffedd5; margin-bottom: 0.5rem; margin-left: 0.5rem; display: inline-block; font-weight: 600; cursor: pointer;" title="Click to add Group">+ เพิ่มกลุ่มงาน</span>` : '');
 
                 card.innerHTML = `
-                    ${currentUser && currentUser.role === 'Admin' ? `<div class="delete-btn" onclick="deleteJobUI('${job.JobID}', '${job.Title.replace(/'/g, "\\'")}')" title="Delete Job"></div>` : ''}
+                    ${isAdmin ? `<div class="delete-btn" onclick="deleteJobUI('${job.JobID}', '${job.Title.replace(/'/g, "\\'")}')" title="Delete Job"></div>` : ''}
                     <div>
-                        ${termBadge}
+                        ${termBadge}${groupBadge}
                         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                             <h3 style="margin-bottom: 0.25rem;">${job.Title}</h3>
                             <span style="color: var(--primary); font-weight: 700; font-size: 0.875rem;">${percent}%</span>
                         </div>
                         <p>${job.Description}</p>
-                        
-                        <!-- Progress Bar Mini -->
                         <div class="progress-container" style="height: 6px; margin: 0.5rem 0;">
                             <div class="progress-fill" style="width: ${percent}%"></div>
                         </div>
-
-                        <!-- Submitter Avatars Mini -->
                         <div class="submitter-tray" style="margin-top: 1rem; transform: scale(0.9); transform-origin: left;">
                             ${(job.assignedUsers || []).map(u => {
                     const hasSubmitted = job.submitters.some(s => s.id.toString().trim().toLowerCase() === u.id.toString().trim().toLowerCase());
-                    return `<img src="${getImgUrl(u.profilePic)}" 
-                                             class="tray-avatar ${hasSubmitted ? 'done' : 'pending'}" 
-                                             onerror="handleImgError(this)"
-                                             title="${u.name} (ID: ${u.id}) - URL: ${u.profilePic}">`;
+                    return `<img src="${getImgUrl(u.profilePic)}" class="tray-avatar ${hasSubmitted ? 'done' : 'pending'}" onerror="handleImgError(this)" title="${u.name} (ID: ${u.id})">`;
                 }).join('')}
-                            <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 20px; line-height: 32px;">
-                                ${submittedCount} / ${targetCount} submitted
-                            </span>
+                            <span style="font-size: 0.75rem; color: var(--text-muted); margin-left: 20px; line-height: 32px;">${submittedCount} / ${targetCount} submitted</span>
                         </div>
-
                         <div class="deadline" style="margin-top: 1rem; color: #ff4d4f; font-weight: 600;">Deadline: ${new Date(job.Deadline).toLocaleString()}</div>
                     </div>
                     <button type="button" onclick="openBoard('${job.id || job.JobID}')" style="margin-top: 1rem;">View Board</button>
                 `;
                 container.appendChild(card);
             });
+        }
+
+        async function loadJobs(role) {
+            const data = await api('getJobs', {}, { silent: true });
+            const jobs = data.jobs;
+            allJobs = jobs;
+            window._totalTeachers = data.totalTeachers || 1;
+
+            buildTermTabs(jobs, role);
+            renderJobCards(jobs, role);
         }
 
         function openCreateJobModal() {
@@ -1395,6 +1612,7 @@
                 description: document.getElementById('jobDesc').value,
                 academicYear: document.getElementById('jobAcademicYear').value,
                 semester: document.getElementById('jobSemester').value,
+                workGroup: document.getElementById('jobWorkGroup').value,
                 assignedUserIds: selectedIds
             };
             await api('createJob', data);
@@ -1404,13 +1622,65 @@
             document.getElementById('jobTitle').value = '';
             document.getElementById('jobDeadline').value = '';
             document.getElementById('jobDesc').value = '';
-            document.getElementById('jobAcademicYear').value = '2568';
-            document.getElementById('jobSemester').value = '1';
+            document.getElementById('jobWorkGroup').value = '';
             toggleAllTeachers(false);
             document.getElementById('selectAllTeachers').checked = false;
-            
+
             closeCreateJobModal();
             loadJobs('admin');
+        }
+
+        function openSelectJobGroupModal(jobId, currentGroup) {
+            const container = document.getElementById('jobGroupOptions');
+            const customInput = document.getElementById('customJobGroupName');
+            const confirmBtn = document.getElementById('confirmJobGroupBtn');
+            
+            customInput.value = currentGroup || '';
+            
+            // Get all unique groups from teachers
+            const allGroups = [];
+            allTeachersCache.forEach(t => {
+                if (t.workGroup) {
+                    t.workGroup.split(',').forEach(g => {
+                        const trimmed = g.trim();
+                        if (trimmed && !allGroups.includes(trimmed)) allGroups.push(trimmed);
+                    });
+                }
+            });
+            const groups = getOrderedGroups(allGroups);
+
+            container.innerHTML = groups.map(g => `
+                <button type="button" class="btn-secondary" onclick="selectJobGroupFromOption('${g}')" style="text-align: left; padding: 0.75rem 1rem; ${g === currentGroup ? 'border-color: var(--primary); background: #eef2ff; color: var(--primary);' : ''}">
+                    📂 ${g}
+                </button>
+            `).join('') || '<p style="text-align: center; color: var(--text-muted);">ไม่พบกลุ่มงานเดิมในระบบ</p>';
+
+            confirmBtn.onclick = () => confirmSelectJobGroup(jobId, customInput.value.trim());
+            document.getElementById('selectJobGroupModal').style.display = 'flex';
+        }
+
+        function selectJobGroupFromOption(name) {
+            document.getElementById('customJobGroupName').value = name;
+        }
+
+        function closeSelectJobGroupModal() {
+            document.getElementById('selectJobGroupModal').style.display = 'none';
+        }
+
+        async function confirmSelectJobGroup(jobId, newGroup) {
+            try {
+                showToast('กำลังอัปเดตกลุ่มงาน...');
+                await api('updateJobWorkGroup', { jobId, workGroup: newGroup });
+                showToast('อัปเกตกลุ่มงานเรียบร้อยแล้ว');
+                closeSelectJobGroupModal();
+                loadJobs(currentUser.role === 'Admin' ? 'admin' : 'teacher');
+            } catch (err) {
+                showToast('Error: ' + err.message, 'danger');
+            }
+        }
+
+        async function changeJobWorkGroup(jobId, currentGroup) {
+            openSelectJobGroupModal(jobId, currentGroup);
         }
 
         async function deleteJobUI(jobId, title) {
@@ -1498,7 +1768,7 @@
                         sub.user.name.trim() === currentUser.name.trim());
 
                 const colorClass = `book-color-${index % 5}`;
-                
+
                 let fileId = '';
                 if (sub.fileUrl) {
                     const match = sub.fileUrl.match(/[-\w]{25,}/);
@@ -1511,7 +1781,7 @@
                 item.target = '_blank';
                 item.className = `book-item ${colorClass}`;
                 item.title = `File: ${sub.fileName || '-'}\nFrom: ${sub.user.name} ${sub.user.surname}\nDelivered: ${new Date(sub.submittedAt).toLocaleString()}`;
-                
+
                 item.innerHTML = `
                     <div class="book-title">${sub.fileName || 'Document'}</div>
                     ${(isAdmin || isOwner) ? `<div class="book-delete" onclick="event.preventDefault(); deleteSubmissionUI('${sub.id}')" title="Delete File">✕</div>` : ''}
