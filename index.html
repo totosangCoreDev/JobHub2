@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Job Submission System</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
@@ -478,6 +478,103 @@
             z-index: 1000;
             display: none;
         }
+
+        /* Responsive Mobile Layout */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            .nav-content {
+                flex-direction: column;
+                gap: 1rem;
+                padding: 1rem;
+            }
+            .user-info {
+                width: 100%;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+            .card {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            .modal {
+                padding: 1.5rem;
+                width: 95%;
+            }
+            .submission-board {
+                grid-template-columns: repeat(auto-fill, minmax(100%, 1fr));
+            }
+            #assignedUserList {
+                padding: 1rem;
+                gap: 1rem;
+            }
+            #groupFilters button {
+                flex: 1 1 auto;
+                text-align: center;
+            }
+        }
+        
+        /* Voice Typing Mic Button */
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            width: 100%;
+        }
+
+        .mic-btn {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+            padding: 0.25rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: auto;
+        }
+
+        .mic-btn:hover {
+            color: var(--primary);
+            transform: scale(1.1) translateY(-45%);
+        }
+        
+        .mic-btn.recording {
+            color: var(--danger);
+            animation: pulse-mic 1.5s infinite;
+        }
+
+        @keyframes pulse-mic {
+            0% { transform: scale(1) translateY(-50%); }
+            50% { transform: scale(1.15) translateY(-45%); }
+            100% { transform: scale(1) translateY(-50%); }
+        }
+
+        textarea + .mic-btn {
+            top: 20px;
+            transform: none;
+        }
+        textarea + .mic-btn:hover {
+            transform: scale(1.1);
+        }
+        textarea + .mic-btn.recording {
+            animation: pulse-mic-textarea 1.5s infinite;
+        }
+        @keyframes pulse-mic-textarea {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.15); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 
@@ -523,11 +620,17 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="form-group">
                     <label>First Name</label>
-                    <input type="text" id="regName">
+                    <div class="input-wrapper">
+                        <input type="text" id="regName">
+                        <button type="button" class="mic-btn" onclick="startVoiceInput('regName')" title="Voice Type">🎤</button>
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Last Name</label>
-                    <input type="text" id="regSurname">
+                    <div class="input-wrapper">
+                        <input type="text" id="regSurname">
+                        <button type="button" class="mic-btn" onclick="startVoiceInput('regSurname')" title="Voice Type">🎤</button>
+                    </div>
                 </div>
             </div>
             <div class="form-group">
@@ -757,7 +860,10 @@
                 </div>
                 <div class="form-group">
                     <label>Comment</label>
-                    <textarea id="subComment" rows="2"></textarea>
+                    <div class="input-wrapper">
+                        <textarea id="subComment" rows="2"></textarea>
+                        <button type="button" class="mic-btn" onclick="startVoiceInput('subComment')" title="Voice Type">🎤</button>
+                    </div>
                 </div>
                 <button type="button" onclick="submitWork()" style="width: auto;">Submit</button>
             </div>
@@ -778,11 +884,17 @@
                     <h3>Update Profile</h3>
                     <div class="form-group" style="margin-top: 1rem;">
                         <label>First Name</label>
-                        <input type="text" id="setNames">
+                        <div class="input-wrapper">
+                            <input type="text" id="setNames">
+                            <button type="button" class="mic-btn" onclick="startVoiceInput('setNames')" title="Voice Type">🎤</button>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Last Name</label>
-                        <input type="text" id="setSurname">
+                        <div class="input-wrapper">
+                            <input type="text" id="setSurname">
+                            <button type="button" class="mic-btn" onclick="startVoiceInput('setSurname')" title="Voice Type">🎤</button>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Email</label>
@@ -844,7 +956,10 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
                 <div class="form-group" style="margin-bottom: 0;">
                     <label>Title</label>
-                    <input type="text" id="jobTitle">
+                    <div class="input-wrapper">
+                        <input type="text" id="jobTitle">
+                        <button type="button" class="mic-btn" onclick="startVoiceInput('jobTitle')" title="Voice Type">🎤</button>
+                    </div>
                 </div>
                 <div class="form-group" style="margin-bottom: 0;">
                     <label>Deadline</label>
@@ -853,7 +968,10 @@
             </div>
             <div class="form-group" style="margin-bottom: 1rem;">
                 <label>Description</label>
-                <textarea id="jobDesc" rows="2"></textarea>
+                <div class="input-wrapper">
+                    <textarea id="jobDesc" rows="2"></textarea>
+                    <button type="button" class="mic-btn" onclick="startVoiceInput('jobDesc')" title="Voice Type">🎤</button>
+                </div>
             </div>
 
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1rem; margin-bottom: 1.5rem;">
@@ -915,7 +1033,10 @@
 
             <div class="form-group">
                 <label>หรือระบุชื่อกลุ่มเอง (Custom Name)</label>
-                <input type="text" id="customJobGroupName" placeholder="พิมพ์ชื่อกลุ่มงานที่ต้องการที่นี่...">
+                <div class="input-wrapper">
+                    <input type="text" id="customJobGroupName" placeholder="พิมพ์ชื่อกลุ่มงานที่ต้องการที่นี่...">
+                    <button type="button" class="mic-btn" onclick="startVoiceInput('customJobGroupName')" title="Voice Type">🎤</button>
+                </div>
             </div>
 
             <div style="display: flex; gap: 1rem; margin-top: 1.5rem;">
@@ -945,7 +1066,10 @@
             <h3 style="margin-bottom: 1rem;">เพิ่มกลุ่มงานใหม่ (Add Work Group)</h3>
             <div class="form-group">
                 <label>ชื่อกลุ่มงานใหม่</label>
-                <input type="text" id="newGroupName" placeholder="เช่น กิจการนักเรียน">
+                <div class="input-wrapper">
+                    <input type="text" id="newGroupName" placeholder="เช่น กิจการนักเรียน">
+                    <button type="button" class="mic-btn" onclick="startVoiceInput('newGroupName')" title="Voice Type">🎤</button>
+                </div>
             </div>
             <div class="form-group">
                 <label>เลือกผู้ร่วมงาน</label>
@@ -2059,6 +2183,54 @@
             document.getElementById('loginPass').value = '';
 
             showToast('Logged out successfully');
+        }
+
+        // --- Voice Typing Logic ---
+        function startVoiceInput(inputId) {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                showToast('เบราว์เซอร์ของคุณไม่รองรับการพิมพ์ด้วยเสียง (Voice Typing)', 'danger');
+                return;
+            }
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const recognition = new SpeechRecognition();
+            recognition.lang = 'th-TH'; // ภาษาไทย
+            recognition.interimResults = false;
+            recognition.maxAlternatives = 1;
+
+            const inputEl = document.getElementById(inputId);
+            const btnEl = inputEl.nextElementSibling;
+            
+            recognition.start();
+            
+            recognition.onstart = function() {
+                if(btnEl && btnEl.classList.contains('mic-btn')) {
+                    btnEl.classList.add('recording');
+                }
+                showToast('กำลังฟังเสียง...', 'success');
+            };
+
+            recognition.onresult = function(event) {
+                const speechResult = event.results[0][0].transcript;
+                if (inputEl.value) {
+                    inputEl.value += ' ' + speechResult;
+                } else {
+                    inputEl.value = speechResult;
+                }
+                showToast('รับข้อความสำเร็จ', 'success');
+            };
+
+            recognition.onerror = function(event) {
+                console.error('Speech recognition error: ', event.error);
+                if (event.error !== 'no-speech') {
+                    showToast('เกิดข้อผิดพลาดในการรับเสียง (' + event.error + ')', 'danger');
+                }
+            };
+
+            recognition.onend = function() {
+                if(btnEl && btnEl.classList.contains('mic-btn')) {
+                    btnEl.classList.remove('recording');
+                }
+            };
         }
     </script>
 </body>
